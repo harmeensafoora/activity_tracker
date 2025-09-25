@@ -10,25 +10,15 @@ if(isset($_POST['login'])) {
     $stmt = $dbh->prepare($sql);
     $stmt->execute([':email' => $email, ':password' => $password]);
 
-    if ($stmt->rowCount() === 1) {
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    $_SESSION['admin_id'] = $row['ID'];
-    $_SESSION['admin_email'] = $row['Email'];
-
-    // Fetch subjects by their VARCHAR ID
-    $sql_subjects = "SELECT subject_id FROM admin_subjects WHERE admin_id = :admin_id";
-    $stmt_subjects = $dbh->prepare($sql_subjects);
-    $stmt_subjects->execute([':admin_id' => $row['ID']]);
-    $subject_ids = $stmt_subjects->fetchAll(PDO::FETCH_COLUMN);
-
-    // Store the list of subject codes in the session
-    $_SESSION['admin_subjects'] = $subject_ids;
-
-    header("Location: admin_dashboard.php");
-    exit;
-} else {
-    $error = "Invalid email or password.";
-}
+    if($stmt->rowCount() === 1) {
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $_SESSION['admin_id'] = $row['ID'];
+        $_SESSION['admin_email'] = $row['Email'];
+        header("Location: admin_dashboard.php");
+        exit;
+    } else {
+        $error = "Invalid email or password.";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -67,6 +57,7 @@ if(isset($_POST['login'])) {
       margin-bottom: 10px;
       font-size: 14px;
     }
+
     .btn {
       background: #2980b9;
       color: white;
@@ -77,6 +68,16 @@ if(isset($_POST['login'])) {
       cursor: pointer;
       font-weight: bold;
       transition: 0.3s;
+    }
+    .btn2 {
+      padding: 10px;
+      width: 50%;
+      
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s;
+      margin-left: 47%;
     }
 
     .btn:hover {
@@ -90,7 +91,7 @@ if(isset($_POST['login'])) {
       width: 350px;
       transition: transform 0.3s ease;
       margin-left: 40%;
-      margin-top: 50px;
+      margin-top: 5%;
     }
 
     .form-section h2 {
@@ -98,12 +99,15 @@ if(isset($_POST['login'])) {
       font-size: 1.4rem;
       text-align: center;
       color: #2c3e50;
-      margin-top: 200px;
     }
-    span{
-      font-size: 25px;
-      font-weight: bolder;
-    }
+    /* main {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 30px;
+      padding: 40px;
+      flex-wrap: wrap;
+    } */
   </style>
 </head>
 <body>
@@ -117,18 +121,15 @@ if(isset($_POST['login'])) {
 
     <form method="post" action="" class="form-section">
       <div class="field">
-    <p><span>Hello, Admin!</span><br>Login to track and update student activities.</p>
         <label class="small">Email</label>
-        <input type="text" name="email" required placeholder="Enter Email">
+        <input type="email" name="email" required>
       </div>
       <div class="field">
         <label class="small">Password</label>
-        <input type="password" name="password" required placeholder="Enter Password">
+        <input type="password" name="password" required>
       </div>
       <button type="submit" name="login" class="btn">Login</button>
-    </form>
-
-    <p class="small center mt-12">Go back to <a href="index.php">View Seminars</a></p>
-  </div>
+    </form><br>
+    <a href="index.php" class="btn2">Return to Home</a>
 </body>
 </html>

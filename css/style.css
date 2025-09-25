@@ -95,7 +95,7 @@ textarea { min-height: 64px; resize: vertical; }
 
 /* ========== Tables ========== */
 table {
-  width: 100%;
+  width: 80%;
   border-collapse: collapse;
   margin-top: 12px;
   border-radius: 10px;

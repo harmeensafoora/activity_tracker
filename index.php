@@ -46,8 +46,8 @@ session_start();
     }
 
     nav .btn:hover {
+      background: #305db1ff;
       color: white;
-      background: #2980b9;
     }
 
     main {
@@ -199,7 +199,7 @@ session_start();
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Logic for the Submit Seminar form's dynamic dropdown
+      // Logic for the Submit Seminar form's dynamic dropdowns
       const deptSelectSubmit = document.getElementById('department-select-submit');
       const semesterSelectSubmit = document.getElementById('semester-select-submit');
       const subjectSelectSubmit = document.getElementById('subject-select-submit');
@@ -242,7 +242,7 @@ session_start();
       deptSelectSubmit.addEventListener('change', fetchSubjectsSubmit);
       semesterSelectSubmit.addEventListener('change', fetchSubjectsSubmit);
 
-      // Logic for the View Seminar form's dynamic dropdown
+      // Logic for the View Seminar form's dynamic dropdowns
       const deptSelectView = document.getElementById('department-select-view');
       const semesterSelectView = document.getElementById('semester-select-view');
       const subjectSelectView = document.getElementById('subject-select-view');

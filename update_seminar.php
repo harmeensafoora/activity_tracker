@@ -10,24 +10,38 @@ if (!isset($_SESSION['admin_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = intval($_POST['id']);
     $action = $_POST['action'];
+    $remarks = trim($_POST['remarks']);
+    
+    // Default values
+    $status = null;
+    $seminar_given = null;
+    
+    $update_fields = [];
+    $update_params = [':id' => $id];
 
-    if ($action === "approve" || $action === "reject") {
-        $remarks = trim($_POST['remarks']);
-        $status = ($action === "approve") ? "Approved" : "Rejected";
+    if ($action === 'approve') {
+        $status = 'Approved';
+        $update_fields[] = "status = :status";
+        $update_params[':status'] = $status;
+    } elseif ($action === 'reject') {
+        $status = 'Rejected';
+        $update_fields[] = "status = :status";
+        $update_params[':status'] = $status;
+    } elseif ($action === 'mark_given') {
+        $seminar_given = 'Yes';
+        $update_fields[] = "seminar_given = :seminar_given";
+        $update_params[':seminar_given'] = $seminar_given;
+    }
 
-        $sql = "UPDATE seminars SET status = :status, remarks = :remarks WHERE id = :id";
+    if (!empty($remarks) && ($action === 'approve' || $action === 'reject')) {
+        $update_fields[] = "remarks = :remarks";
+        $update_params[':remarks'] = $remarks;
+    }
+    
+    if (!empty($update_fields)) {
+        $sql = "UPDATE seminars SET " . implode(', ', $update_fields) . " WHERE id = :id";
         $stmt = $dbh->prepare($sql);
-        $stmt->execute([
-            ':status' => $status,
-            ':remarks' => $remarks,
-            ':id' => $id
-        ]);
-    } elseif ($action === "mark_given") {
-        $sql = "UPDATE seminars SET seminar_given = 'Yes' WHERE id = :id";
-        $stmt = $dbh->prepare($sql);
-        $stmt->execute([
-            ':id' => $id
-        ]);
+        $stmt->execute($update_params);
     }
 }
 

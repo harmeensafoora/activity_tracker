@@ -7,8 +7,11 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// Get the list of subject IDs from the session
-$admin_subjects = $_SESSION['admin_subjects'] ?? [];
+// Fetch the subjects assigned to the current admin
+$sql_subjects = "SELECT subject_id FROM admin_subjects WHERE admin_id = :admin_id";
+$stmt_subjects = $dbh->prepare($sql_subjects);
+$stmt_subjects->execute([':admin_id' => $_SESSION['admin_id']]);
+$admin_subjects = $stmt_subjects->fetchAll(PDO::FETCH_COLUMN, 0);
 
 // Fetch seminars based on the subjects the admin teaches
 if (!empty($admin_subjects)) {
@@ -19,7 +22,7 @@ if (!empty($admin_subjects)) {
             LEFT JOIN departments d ON s.dept_id = d.id
             LEFT JOIN semesters sem ON s.semester_id = sem.id
             LEFT JOIN subjects subj ON s.subject_id = subj.id
-            WHERE s.subject_id IN ($placeholders) ORDER BY id DESC";
+            WHERE s.subject_id IN ($placeholders) ORDER BY s.submitted_at DESC";
 
     $query = $dbh->prepare($sql);
     $query->execute($admin_subjects);
@@ -62,6 +65,7 @@ if (!empty($admin_subjects)) {
           <th>Topic</th>
           <th>Status</th>
           <th>Seminar Given</th>
+          <th>Submitted At</th>
           <th>Remarks</th>
           <th>Action</th>
         </tr>
@@ -83,8 +87,9 @@ if (!empty($admin_subjects)) {
                 ⏳ Pending
               <?php endif; ?>
             </td>
-            <td class="given"><?php echo htmlspecialchars($row['seminar_given']); ?></td>
-            <td><?php echo htmlspecialchars($row['remarks']); ?></td>
+            <td class="given"><?php echo htmlspecialchars($row['seminar_given'] ?? 'N/A'); ?></td>
+            <td><?php echo htmlspecialchars($row['submitted_at']); ?></td>
+            <td><?php echo htmlspecialchars($row['remarks'] ?? 'N/A'); ?></td>
             <td>
               <?php if ($row['status'] === 'Pending'): ?>
                 <form method="post" action="update_seminar.php" class="action-form">

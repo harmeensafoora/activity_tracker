@@ -1,4 +1,5 @@
 <?php
+session_start();
 include('includes/db_connect.php');
 
 // Get filters from the URL, using a fallback to prevent warnings
@@ -41,6 +42,8 @@ if (!empty($topic_param)) {
     $params[':topic'] = "%" . $topic_param . "%";
 }
 
+$sql .= " ORDER BY s.submitted_at DESC";
+
 $query = $dbh->prepare($sql);
 $query->execute($params);
 $seminars = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -68,6 +71,8 @@ $seminars = $query->fetchAll(PDO::FETCH_ASSOC);
   </header>
 
   <main>
+    <?php if (isset($_SESSION['admin_id'])): ?>
+    <?php endif; ?>
     <?php if (count($seminars) > 0): ?>
       <table>
         <thead>
@@ -78,8 +83,9 @@ $seminars = $query->fetchAll(PDO::FETCH_ASSOC);
             <th>Subject</th>
             <th>Topic</th>
             <th>Status</th>
-            <th>Remarks</th>
             <th>Seminar Given</th>
+            <th>Submitted At</th>
+            <th>Remarks</th>
           </tr>
         </thead>
         <tbody>
@@ -99,8 +105,9 @@ $seminars = $query->fetchAll(PDO::FETCH_ASSOC);
                   ⏳ Pending
                 <?php endif; ?>
               </td>
-              <td><?= htmlspecialchars($row['remarks']); ?></td>
-              <td><?= htmlspecialchars($row['seminar_given']); ?></td>
+              <td class="given"><?= htmlspecialchars($row['seminar_given'] ?? 'N/A'); ?></td>
+              <td><?= htmlspecialchars($row['submitted_at'] ?? 'N/A'); ?></td>
+              <td><?= htmlspecialchars($row['remarks'] ?? 'N/A'); ?></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

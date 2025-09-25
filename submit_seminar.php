@@ -9,39 +9,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $subject_id = $_POST['subject'];
     $topic = trim($_POST['topic']);
 
-    try {
-        // Verify Department
-        $sql_dept = "SELECT id FROM departments WHERE name = :name";
-        $stmt_dept = $dbh->prepare($sql_dept);
-        $stmt_dept->execute([':name' => $department_name]);
-        $dept_id = $stmt_dept->fetchColumn();
-        if (!$dept_id) {
-            $_SESSION['error_message'] = "Error: Department '" . htmlspecialchars($department_name) . "' not found in the database.";
-            header("Location: index.php");
-            exit();
-        }
+    // Get dept_id from the department name
+    $sql_dept = "SELECT id FROM departments WHERE name = :name";
+    $stmt_dept = $dbh->prepare($sql_dept);
+    $stmt_dept->execute([':name' => $department_name]);
+    $dept_id = $stmt_dept->fetchColumn();
 
-        // Verify Semester
-        $sql_semester = "SELECT id FROM semesters WHERE id = :id";
-        $stmt_semester = $dbh->prepare($sql_semester);
-        $stmt_semester->execute([':id' => $semester_id]);
-        if (!$stmt_semester->fetchColumn()) {
-            $_SESSION['error_message'] = "Error: Selected semester ID '" . htmlspecialchars($semester_id) . "' not found.";
-            header("Location: index.php");
-            exit();
-        }
-
-        // Verify Subject
-        $sql_subject = "SELECT id FROM subjects WHERE id = :id";
-        $stmt_subject = $dbh->prepare($sql_subject);
-        $stmt_subject->execute([':id' => $subject_id]);
-        if (!$stmt_subject->fetchColumn()) {
-            $_SESSION['error_message'] = "Error: Selected subject ID '" . htmlspecialchars($subject_id) . "' not found.";
-            header("Location: index.php");
-            exit();
-        }
-
-        // All foreign keys are valid, proceed with insertion
+    if ($dept_id) {
+        // Insert new seminar topic using IDs
         $sql = "INSERT INTO seminars (student_name, dept_id, semester_id, subject_id, topic, status) 
                 VALUES (:student_name, :dept_id, :semester_id, :subject_id, :topic, 'Pending')";
         $stmt = $dbh->prepare($sql);
@@ -54,13 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ]);
 
         $_SESSION['success_message'] = "✅ Topic '$topic' submitted successfully!";
-        header("Location: index.php");
-        exit();
-
-    } catch (PDOException $e) {
-        $_SESSION['error_message'] = "Database Error: " . $e->getMessage();
-        header("Location: index.php");
-        exit();
+    } else {
+        $_SESSION['error_message'] = "❌ Error: Department not found.";
     }
+
+    header("Location: index.php");
+    exit();
 }
 ?>
